@@ -18,7 +18,8 @@ export const GlobalStoreActionType = {
     LOAD_ID_NAME_PAIRS: "LOAD_ID_NAME_PAIRS",
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
-}
+    DELETE_LIST: "DELETE_LIST",
+};
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
 const tps = new jsTPS();
@@ -60,11 +61,20 @@ export const useGlobalStore = () => {
             // CREATE A NEW LIST
             case GlobalStoreActionType.CREATE_NEW_LIST: {
                 return setStore({
-                    idNamePairs: store.idNamePairs,
-                    currentList: payload,
+                    idNamePairs: payload.idNamePairs,
+                    currentList: payload.playlist,
                     newListCounter: store.newListCounter + 1,
                     listNameActive: false
                 })
+            }
+            // DELETE A LIST
+            case GlobalStoreActionType.DELETE_LIST: {
+                return setStore({
+                    idNamePairs: payload,
+                    currentList: null,
+                    newListCounter: store.newListCounter,
+                    listNameActive: false,
+                });
             }
             // GET ALL THE LISTS SO WE CAN PRESENT THEM
             case GlobalStoreActionType.LOAD_ID_NAME_PAIRS: {
@@ -113,13 +123,40 @@ export const useGlobalStore = () => {
     // THIS FUNCTION PROCESSES CHANGING A LIST NAME
     store.changeListName = function (id, newName) {
         // GET THE LIST
+        (async () => {
+            try {
+                let res = await api.getPlaylistById(id);
+                if (res.data.success) {
+                    let playlist = res.data.playlist;
+                    res = await api.updatePlaylistById(playlist._id, {name: newName, songs: playlist.songs,});
+                    if (res.data.success) {
+                        res = await api.getPlaylistPairs();
+                        let pairsArray = res.data.idNamePairs;
+                        storeReducer({
+                            type: GlobalStoreActionType.CHANGE_LIST_NAME,
+                            payload: {
+                                idNamePairs: pairsArray,
+                                playlist: { ...playlist, name: newName},
+                            },
+                        });
+                    }
+                    else {
+                        throw res;
+                    }
+                }
+            } 
+            catch (exception) 
+            {
+                console.log(exception)
+            }
+        })();
         async function asyncChangeListName(id) {
             let response = await api.getPlaylistById(id);
             if (response.data.success) {
-                let playlist = response.data.playist;
+                let playlist = response.data.playlist;
                 playlist.name = newName;
                 async function updateList(playlist) {
-                    response = await api.updatePlaylistById(playlist._id, playlist);
+                    response = await api.updatePlaylistById(playlist._id, {name: newName, songs: playlist.songs});
                     if (response.data.success) {
                         async function getListPairs(playlist) {
                             response = await api.getPlaylistPairs();
@@ -142,6 +179,64 @@ export const useGlobalStore = () => {
         }
         asyncChangeListName(id);
     }
+
+    store.createNewList = function (playlist) {
+        (async () => {
+            try {
+                let res = await api.createPlaylist(playlist);
+                if (res.data.success) {
+                    let playlist = res.data.playlist;
+                    res = await api.getPlaylistPairs();
+                    if (res.data.success) {
+                        let pairsArray = res.data.idNamePairs;
+                        storeReducer({
+                            type: GlobalStoreActionType.CREATE_NEW_LIST,
+                            payload: {
+                                idNamePairs: pairsArray,
+                                playlist: playlist,
+                            },
+                        });
+                    }
+                }
+            } catch (exception) {
+                console.error(exception);
+            }
+        })();
+    };
+
+    store.setIsListNameEditActive = function (id) {
+        (async () => {
+            let response = await api.getPlaylistById(id);
+            if (response.data.success) {
+                let playlist = response.data.playlist;
+                storeReducer({
+                    type: GlobalStoreActionType.SET_LIST_NAME_EDIT_ACTIVE,
+                    payload: playlist,
+                });
+            }
+        })();
+    };
+
+    store.deleteListById = function (id) {
+        (async () => {
+            try {
+                let res = await api.deletePlaylistById(id);
+                if (res.data.success) {
+                    res = await api.getPlaylistPairs();
+                    if (res.data.success) {
+                        let pairsArray = res.data.idNamePairs;
+                        storeReducer({
+                            type: GlobalStoreActionType.DELETE_LIST,
+                            payload: pairsArray,
+                        });
+                    }
+                }
+            } catch (exception) {
+                console.error(exception);
+            }
+        })();
+    };
+
 
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {

@@ -1,6 +1,7 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
 import { GlobalStoreContext } from '../store'
+import DeleteListModal from './DeleteListModal';
 /*
     This is a card in our list of playlists. It lets select
     a list for editing and it has controls for changing its 
@@ -10,10 +11,15 @@ import { GlobalStoreContext } from '../store'
 */
 function ListCard(props) {
     const { store } = useContext(GlobalStoreContext);
+    const [show, setShow] = useState(false);
     const [ editActive, setEditActive ] = useState(false);
     const [ text, setText ] = useState("");
     store.history = useHistory();
-    const { idNamePair, selected } = props;
+    const { idNamePair } = props;
+    const selected = useMemo(
+        () => store.currentList?._id === props.idNamePair._id,
+        [store]
+    );
 
     function handleLoadList(event) {
         if (!event.target.disabled) {
@@ -40,12 +46,20 @@ function ListCard(props) {
     }
 
     function handleKeyPress(event) {
-        if (event.code === "Enter") {
-            let id = event.target.id.substring("list-".length);
-            store.changeListName(id, text);
-            toggleEdit();
+        if (event.code === "Enter" && text.length) {
+            store.changeListName(idNamePair._id, text);
+            setEditActive(false);
         }
     }
+
+    useEffect(() => {
+        if (editActive) {
+            store.setIsListNameEditActive(idNamePair._id);
+        } else {
+            store.closeCurrentList();
+        }
+    }, [editActive]);
+
     function handleUpdateText(event) {
         setText(event.target.value );
     }
@@ -58,7 +72,7 @@ function ListCard(props) {
     if (store.isListNameEditActive) {
         cardStatus = true;
     }
-    let cardElement =
+    let cardElement = (
         <div
             id={idNamePair._id}
             key={idNamePair._id}
@@ -76,16 +90,30 @@ function ListCard(props) {
                 id={"delete-list-" + idNamePair._id}
                 className="list-card-button"
                 value={"\u2715"}
-            />
+                onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setShow(true);
+                }}/>
             <input
                 disabled={cardStatus}
                 type="button"
                 id={"edit-list-" + idNamePair._id}
                 className="list-card-button"
-                onClick={handleToggleEdit}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setEditActive(true);
+                }}
                 value={"\u270E"}
             />
-        </div>;
+            <DeleteListModal
+                idNamePair={idNamePair}
+                show={show}
+                setShow={setShow}
+            />
+        </div>
+    );
 
     if (editActive) {
         cardElement =

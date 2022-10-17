@@ -13,10 +13,11 @@ const ListSelector = () => {
 
     useEffect(() => {
         store.loadIdNamePairs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function handleCreateNewList() {
-        store.createNewList();
+        store.createNewList({ name: "unknown", songs: []});
     }
     let listCard = "";
     if (store) {
@@ -24,7 +25,6 @@ const ListSelector = () => {
             <ListCard
                 key={pair._id}
                 idNamePair={pair}
-                selected={false}
             />
         ))
     }

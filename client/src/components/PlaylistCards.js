@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import { useHistory } from 'react-router-dom'
 import SongCard from './SongCard.js'
 import { GlobalStoreContext } from '../store'
+import EditToolbar from './EditToolbar.js';
 /*
     This React component lets us edit a loaded list, which only
     happens when we are on the proper route.
@@ -14,6 +15,7 @@ function PlaylistCards() {
 
     return (
         <div id="playlist-cards">
+            <EditToolbar />
         {
             store.currentList.songs.map((song, index) => (
                 <SongCard

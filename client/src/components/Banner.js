@@ -10,7 +10,6 @@ function Banner(props) {
     return (        
         <div id="playlister-banner">
             Playlister
-            <EditToolbar />
         </div>
     );
 }
