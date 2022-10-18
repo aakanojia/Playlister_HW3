@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useContext, useMemo } from "react";
+import { GlobalStoreContext } from "../store";
 
-export default function DeleteSongModal({
-    currentSong,
-    deleteConfirm,
-    deleteCancel,
-}) {
+export default function DeleteSongModal({ show, index, setShowDelete }) {
+    const { store } = useContext(GlobalStoreContext);
+
+    const currentSong = useMemo(() => {
+        return store.currentList.songs[index];
+    }, [index, store]);
     return (
         <div
-            className="modal"
+            className={`modal ${show && "is-visible"}`}
             id="remove-song-modal"
             data-animation="slideInOutLeft">
             <div className="modal-root" id="verify-remove-song-root">
@@ -25,13 +27,16 @@ export default function DeleteSongModal({
                         id="remove-song-confirm-button"
                         className="modal-button"
                         value="Confirm"
-                        onClick={deleteConfirm}/>
+                        onClick={() => {
+                            store.deleteSong(index);
+                            setShowDelete(false);
+                        }}/>
                     <input
                         type="button"
                         id="remove-song-cancel-button"
                         className="modal-button"
                         value="Cancel"
-                        onClick={deleteCancel}/>
+                        onClick={() => setShowDelete(false)}/>
                 </div>
             </div>
         </div>

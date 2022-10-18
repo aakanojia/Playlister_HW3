@@ -4,6 +4,7 @@ import SongCard from './SongCard.js'
 import { GlobalStoreContext } from '../store'
 import EditToolbar from './EditToolbar.js';
 import EditSongModal from './EditSongModal.js';
+import DeleteSongModal from './DeleteSongModal.js';
 /*
     This React component lets us edit a loaded list, which only
     happens when we are on the proper route.
@@ -16,6 +17,7 @@ function PlaylistCards() {
 
     const [show, setShow] = useState(false);
     const [index, setIndex] = useState(0);
+    const [showDelete, setShowDelete] = useState(false);
     return (
         <div id="playlist-cards">
             <EditToolbar />
@@ -30,9 +32,14 @@ function PlaylistCards() {
                         setShow(true);
                         setIndex(index);
                     }}
+                    deleteCallBack={(index) => {
+                        setShowDelete(true);
+                        setIndex(index);
+                    }}
                 />
             ))} 
             <EditSongModal show={show} index={index} setShow={setShow} />
+            <DeleteSongModal show={showDelete} index={index} setShowDelete={setShowDelete} />
         </div>
     )
 }

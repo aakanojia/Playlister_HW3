@@ -4,7 +4,7 @@ import { GlobalStoreContext } from '../store'
 function SongCard(props) {
     const { store } = useContext(GlobalStoreContext);
 
-    const { song, index, editCallBack } = props;
+    const { song, index, editCallBack, deleteCallBack } = props;
     
     const [isDragging, setIsDragging] = useState(false);
     const [selected, setSelected] = useState(false);
@@ -70,6 +70,9 @@ function SongCard(props) {
                 id={"remove-song-" + index}
                 className="list-card-button"
                 value={"\u2715"}
+                onClickCapture={() => {
+                    deleteCallBack(index);
+                }}
             />
         </div>
     );
