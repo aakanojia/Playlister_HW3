@@ -13,7 +13,7 @@ const ListSelector = () => {
 
     useEffect(() => {
         store.loadIdNamePairs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function handleCreateNewList() {
@@ -37,7 +37,9 @@ const ListSelector = () => {
                     id="add-list-button"
                     onClick={handleCreateNewList}
                     className="playlister-button"
-                    value="+" />
+                    value="+" 
+                    disabled={store.listNameActive}
+                />
                 Your Lists
             </div>                {
                     listCard

@@ -1,12 +1,14 @@
 import React, { useContext, useMemo } from "react";
 import { GlobalStoreContext } from "../store";
+import DeleteSong_Transaction from "../transactions/DeleteSong_Transaction"
 
 export default function DeleteSongModal({ show, index, setShowDelete }) {
-    const { store } = useContext(GlobalStoreContext);
+    const { store, tps } = useContext(GlobalStoreContext);
 
     const currentSong = useMemo(() => {
         return store.currentList.songs[index];
     }, [index, store]);
+    
     return (
         <div
             className={`modal ${show && "is-visible"}`}
@@ -28,7 +30,13 @@ export default function DeleteSongModal({ show, index, setShowDelete }) {
                         className="modal-button"
                         value="Confirm"
                         onClick={() => {
-                            store.deleteSong(index);
+                            tps.addTransaction(
+                                new DeleteSong_Transaction(store, index, {
+                                    artist: currentSong.artist,
+                                    title: currentSong.title,
+                                    youTubeId: currentSong.youTubeId,
+                                })
+                            )
                             setShowDelete(false);
                         }}/>
                     <input

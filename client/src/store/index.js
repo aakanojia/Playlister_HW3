@@ -123,33 +123,6 @@ export const useGlobalStore = () => {
     // THIS FUNCTION PROCESSES CHANGING A LIST NAME
     store.changeListName = function (id, newName) {
         // GET THE LIST
-        (async () => {
-            try {
-                let res = await api.getPlaylistById(id);
-                if (res.data.success) {
-                    let playlist = res.data.playlist;
-                    res = await api.updatePlaylistById(playlist._id, {name: newName, songs: playlist.songs,});
-                    if (res.data.success) {
-                        res = await api.getPlaylistPairs();
-                        let pairsArray = res.data.idNamePairs;
-                        storeReducer({
-                            type: GlobalStoreActionType.CHANGE_LIST_NAME,
-                            payload: {
-                                idNamePairs: pairsArray,
-                                playlist: { ...playlist, name: newName},
-                            },
-                        });
-                    }
-                    else {
-                        throw res;
-                    }
-                }
-            } 
-            catch (exception) 
-            {
-                console.log(exception)
-            }
-        })();
         async function asyncChangeListName(id) {
             let response = await api.getPlaylistById(id);
             if (response.data.success) {
@@ -312,12 +285,14 @@ export const useGlobalStore = () => {
         });
     }
 
-    store.moveSong = function (id, sourceId, targetId) {
+    store.moveSong = function (sourceId, targetId) {
         if (sourceId !== targetId) {
             let playlist = store.currentList;
-            const name = playlist.name;
             let songs = playlist.songs;
             let temp = songs[targetId];
+
+            const name = playlist.name;
+            const id = playlist._id;
 
             songs[targetId] = songs[sourceId];
             songs[sourceId] = temp
@@ -344,6 +319,29 @@ export const useGlobalStore = () => {
         });
     }
 
+    store.addSong = function (index, song) {
+        let playlist = store.currentList;
+        let newSongs = [];
+
+        const name = playlist.name;
+        const id = playlist._id;
+
+        for (let i = 0; i < index; i++) {
+            newSongs.push(playlist.songs[i]);
+        }
+
+        newSongs.push(song);
+
+        for (let i = index; i < playlist.songs.length; i++) {
+            newSongs.push(playlist.songs[i]);
+        }
+
+        store.updateCurrentList(id, {
+            name,
+            songs: newSongs,
+        });
+    }
+
     store.deleteSong = function (index) {
         let playlist = store.currentList;
         let songs = [...playlist.songs];
@@ -358,7 +356,7 @@ export const useGlobalStore = () => {
             songs,
         });
     }
-    
+
     // THIS GIVES OUR STORE AND ITS REDUCER TO ANY COMPONENT THAT NEEDS IT
-    return { store, storeReducer };
+    return { store, tps, storeReducer };
 }

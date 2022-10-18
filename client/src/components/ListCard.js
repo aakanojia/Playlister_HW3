@@ -13,9 +13,9 @@ function ListCard(props) {
     const { store } = useContext(GlobalStoreContext);
     const [show, setShow] = useState(false);
     const [ editActive, setEditActive ] = useState(false);
-    const [ text, setText ] = useState("");
-    store.history = useHistory();
     const { idNamePair } = props;
+    const [ text, setText ] = useState(idNamePair.name);
+    store.history = useHistory();
     const selected = useMemo(
         () => store.currentList?._id === props.idNamePair._id,
         [store]

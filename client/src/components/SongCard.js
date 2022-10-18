@@ -1,8 +1,9 @@
 import React, { useContext, useState } from 'react'
 import { GlobalStoreContext } from '../store'
+import MoveSong_Transaction from '../transactions/MoveSong_Transaction';
 
 function SongCard(props) {
-    const { store } = useContext(GlobalStoreContext);
+    const { store, tps } = useContext(GlobalStoreContext);
 
     const { song, index, editCallBack, deleteCallBack } = props;
     
@@ -37,7 +38,7 @@ function SongCard(props) {
         let sourceId = event.dataTransfer.getData("song");
         let targetId = index;
 
-        store.moveSong(store.currentList._id, sourceId, targetId);
+        tps.addTransaction(new MoveSong_Transaction(store, sourceId, targetId));
     };
 
     return (

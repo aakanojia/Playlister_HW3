@@ -1,6 +1,7 @@
 import { useContext } from 'react'
 import { GlobalStoreContext } from '../store'
 import { useHistory } from 'react-router-dom'
+import AddSong_Transaction from "../transactions/AddSong_Transaction"
 /*
     This toolbar is a functional React component that
     manages the undo/redo/close buttons.
@@ -8,10 +9,15 @@ import { useHistory } from 'react-router-dom'
     @author McKilla Gorilla
 */
 function EditToolbar() {
-    const { store } = useContext(GlobalStoreContext);
+    const { store, tps } = useContext(GlobalStoreContext);
     const history = useHistory();
 
     let enabledButtonClass = "playlister-button";
+
+    const canAddSong = store.currentList !== null;
+    const canUndo = tps.hasTransactionToUndo();
+    const canRedo = tps.hasTransactionToRedo();
+    const canClose = store.currentList !== null;
 
     const addSong = () => {
         let song = {
@@ -20,22 +26,9 @@ function EditToolbar() {
             youTubeId: "dQw4w9WgXcQ",
         };
 
-        const id = store.currentList._id;
-        const name = store.currentList.name;
-        const songs = store.currentList.songs.map((song) => {
-            return {
-                title: song.title,
-                artist: song.artist,
-                youTubeId: song.youTubeId,
-            };
-        });
-
-        let playlist = {
-            name,
-            songs: [...songs, song],
-        };
-        
-        store.updateCurrentList(id, playlist);
+        tps.addTransaction(
+            new AddSong_Transaction(store, store.currentList.songs.length, song)
+        );
     }
     function handleUndo() {
         store.undo();
@@ -44,19 +37,16 @@ function EditToolbar() {
         store.redo();
     }
     function handleClose() {
+        tps.clearAllTransactions();
         history.push("/");
         store.closeCurrentList();
-    }
-    let editStatus = false;
-    if (store.isListNameEditActive) {
-        editStatus = true;
     }
     return (
         <span id="edit-toolbar">
             <input
                 type="button"
                 id='add-song-button'
-                disabled={editStatus}
+                disabled={!canAddSong}
                 value="+"
                 className={enabledButtonClass}
                 onClick={addSong}
@@ -64,7 +54,7 @@ function EditToolbar() {
             <input
                 type="button"
                 id='undo-button'
-                disabled={editStatus}
+                disabled={!canUndo}
                 value="⟲"
                 className={enabledButtonClass}
                 onClick={handleUndo}
@@ -72,7 +62,7 @@ function EditToolbar() {
             <input
                 type="button"
                 id='redo-button'
-                disabled={editStatus}
+                disabled={!canRedo}
                 value="⟳"
                 className={enabledButtonClass}
                 onClick={handleRedo}
@@ -80,7 +70,7 @@ function EditToolbar() {
             <input
                 type="button"
                 id='close-button'
-                disabled={editStatus}
+                disabled={!canClose}
                 value="&#x2715;"
                 className={enabledButtonClass}
                 onClick={handleClose}

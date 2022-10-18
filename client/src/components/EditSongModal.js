@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import jsTPS from "../common/jsTPS";
 import { GlobalStoreContext } from "../store";
+import UpdateSong_Transaction from "../transactions/UpdateSong_Transaction"
 
 export default function EditSongModal({show, index, setShow}) {
-    const {store} = useContext(GlobalStoreContext);
+    const { store , tps } = useContext(GlobalStoreContext);
     const currentSong = store.currentList.songs[index];
     const [state, setstate] = useState({
         artist: currentSong?.artist || "",
@@ -11,7 +13,9 @@ export default function EditSongModal({show, index, setShow}) {
     });
 
     const editSong = () => {
-        store.editSong(index, state);
+        tps.addTransaction(
+            new UpdateSong_Transaction(store, index, currentSong, state)
+        )
         setShow(false);
     };
 
