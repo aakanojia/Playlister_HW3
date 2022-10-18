@@ -156,6 +156,11 @@ body {
   background-color: var(--swatch-complement);
 }
 
+.is-dragging {
+  border: 2px black solid;
+  background-color: #111111;
+}
+
 .list-card-button {
   float:right;
   font-size:18pt;

@@ -312,6 +312,23 @@ export const useGlobalStore = () => {
         });
     }
 
+    store.moveSong = function (id, sourceId, targetId) {
+        if (sourceId !== targetId) {
+            let playlist = store.currentList;
+            const name = playlist.name;
+            let songs = playlist.songs;
+            let temp = songs[targetId];
+
+            songs[targetId] = songs[sourceId];
+            songs[sourceId] = temp
+
+            store.updateCurrentList(id, {
+                name,
+                songs,
+            });
+        }
+    }
+
     // THIS GIVES OUR STORE AND ITS REDUCER TO ANY COMPONENT THAT NEEDS IT
     return { store, storeReducer };
 }
