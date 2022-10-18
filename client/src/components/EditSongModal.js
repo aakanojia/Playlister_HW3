@@ -1,15 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { GlobalStoreContext } from "../store";
 
-export default function EditSongModal({
-    currentSong,
-    editSongConfirmCallback,
-    editSongCancelCallback,
-}) {
+export default function EditSongModal({show, index, setShow}) {
+    const {store} = useContext(GlobalStoreContext);
+    const currentSong = store.currentList.songs[index];
     const [state, setstate] = useState({
         artist: currentSong?.artist || "",
         title: currentSong?.title || "",
         youTubeId: currentSong?.youTubeId || "",
     });
+
+    const editSong = () => {
+        store.editSong(index, state);
+        setShow(false);
+    };
 
     useEffect(() => {
         if (currentSong) {
@@ -18,7 +22,7 @@ export default function EditSongModal({
     }, [currentSong]);
     return (
         <div
-            className="modal"
+            className={`modal ${show && "is-visible"}`}
             id="edit-song-modal"
             data-animation="slideInOutLeft">
             <div className="modal-root" id="edit-song-root">
@@ -75,13 +79,13 @@ export default function EditSongModal({
                         id="edit-song-confirm-button"
                         className="modal-button"
                         value="Confirm"
-                        onClick={() => editSongConfirmCallback(state)}/>
+                        onClick={editSong}/>
                     <input
                         type="button"
                         id="edit-song-cancel-button"
                         className="modal-button"
                         value="Cancel"
-                        onClick={editSongCancelCallback}/>
+                        onClick={() => setShow(false)}/>
                 </div>
             </div>
         </div>

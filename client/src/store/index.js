@@ -329,6 +329,20 @@ export const useGlobalStore = () => {
         }
     }
 
+    store.editSong = function (index, song) {
+        let playlist = store.currentList;
+        let songs = playlist.songs;
+
+        const name = playlist.name;
+        const id = playlist._id;
+        
+        songs[index] = song;
+
+        store.updateCurrentList(id, {
+            name,
+            songs,
+        });
+    }
     // THIS GIVES OUR STORE AND ITS REDUCER TO ANY COMPONENT THAT NEEDS IT
     return { store, storeReducer };
 }

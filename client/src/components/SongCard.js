@@ -4,7 +4,7 @@ import { GlobalStoreContext } from '../store'
 function SongCard(props) {
     const { store } = useContext(GlobalStoreContext);
 
-    const { song, index } = props;
+    const { song, index, editCallBack } = props;
     
     const [isDragging, setIsDragging] = useState(false);
     const [selected, setSelected] = useState(false);
@@ -54,6 +54,9 @@ function SongCard(props) {
             onDragEnd={handleDragEnd}
             onDrop={handleDrop}
             draggable="true"
+            onDoubleClick={() => {
+                editCallBack(index);
+            }}
         >
             {index + 1}.
             <a
