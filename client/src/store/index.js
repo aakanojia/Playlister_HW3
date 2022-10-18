@@ -218,25 +218,20 @@ export const useGlobalStore = () => {
     };
 
     store.deleteListById = function (id) {
-        (async () => {
-            try {
-                let res = await api.deletePlaylistById(id);
-                if (res.data.success) {
-                    res = await api.getPlaylistPairs();
-                    if (res.data.success) {
-                        let pairsArray = res.data.idNamePairs;
+        async function asyncDeleteListById(id) {
+            let response = await api.deletePlaylistById(id);
+                if (response.data.success) {
+                    response = await api.getPlaylistPairs();
+                    if (response.data.success) {
+                        let pairsArray = response.data.idNamePairs;
                         storeReducer({
                             type: GlobalStoreActionType.DELETE_LIST,
                             payload: pairsArray,
                         });
                     }
                 }
-            } catch (exception) {
-                console.error(exception);
-            }
-        })();
+        } asyncDeleteListById(id);
     };
-
 
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {
@@ -280,6 +275,24 @@ export const useGlobalStore = () => {
             }
         }
         asyncSetCurrentList(id);
+    }
+    store.updateCurrentList = function (id, playlist) {
+        async function asyncUpdateCurrentList(id, playlist) {
+            let response = await api.updatePlaylistById(id, playlist);
+            if (response.data.success) {
+                response = await api.getPlaylistById(id);
+                if (response.data.success) {
+                    let playlist = response.data.playlist;
+                    if (response.data.success) {
+                        storeReducer({
+                            type: GlobalStoreActionType.SET_CURRENT_LIST,
+                            payload: playlist,
+                        })
+                    }
+                }
+            }
+        }
+        asyncUpdateCurrentList(id, playlist)
     }
     store.getPlaylistSize = function() {
         return store.currentList.songs.length;

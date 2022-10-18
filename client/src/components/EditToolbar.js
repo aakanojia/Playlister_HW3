@@ -13,6 +13,30 @@ function EditToolbar() {
 
     let enabledButtonClass = "playlister-button";
 
+    const addSong = () => {
+        let song = {
+            title: "Untitled",
+            artist: "Unknown",
+            youTubeId: "dQw4w9WgXcQ",
+        };
+
+        const id = store.currentList._id;
+        const name = store.currentList.name;
+        const songs = store.currentList.songs.map((song) => {
+            return {
+                title: song.title,
+                artist: song.artist,
+                youTubeId: song.youTubeId,
+            };
+        });
+
+        let playlist = {
+            name,
+            songs: [...songs, song],
+        };
+        
+        store.updateCurrentList(id, playlist);
+    }
     function handleUndo() {
         store.undo();
     }
@@ -35,6 +59,7 @@ function EditToolbar() {
                 disabled={editStatus}
                 value="+"
                 className={enabledButtonClass}
+                onClick={addSong}
             />
             <input
                 type="button"
